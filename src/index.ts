@@ -1,13 +1,16 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { createServer } from 'http';
 import { config } from 'dotenv';
 import stockDetailRouter from './routes/stock-detail.route';
 import topPicksRouter from './routes/top-picks.route';
 import { HttpError } from './utils/http-error';
+import { attachWebSocketServer } from './websocket/server';
 
 config();
 
 const app = express();
-const port = Number(process.env.API_PORT) || 4000;
+const port = resolvePort(process.env.API_PORT, 4000);
+const host = process.env.API_HOST || '127.0.0.1';
 const allowedOrigins = (() => {
   const origins = (process.env.CORS_ALLOW_ORIGIN ?? '*')
     .split(',')
@@ -63,6 +66,14 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(status).json({ message });
 });
 
-app.listen(port, () => {
-  console.log(`[api] Stock detail server listening on http://localhost:${port}`);
+const server = createServer(app);
+attachWebSocketServer(server);
+
+server.listen(port, host, () => {
+  console.log(`[api] Stock detail server listening on http://${host}:${port}`);
 });
+
+function resolvePort(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}

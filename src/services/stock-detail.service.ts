@@ -5,17 +5,20 @@ import {
   ListStocksOptions,
   StockListResponseDto
 } from './market-simulator';
+import { applyMockDelay } from '../utils/mock-delay';
 
 export interface StockDetailOptions {
   intervalMinutes?: number;
 }
 
-export function getStockDetail(symbol: string, options: StockDetailOptions = {}): Promise<StockDetailDto> {
-  return Promise.resolve(getSimulatedStockDetail(symbol, options));
+export async function getStockDetail(symbol: string, options: StockDetailOptions = {}): Promise<StockDetailDto> {
+  await applyMockDelay();
+  return getSimulatedStockDetail(symbol, options);
 }
 
-export function listStocks(options: ListStocksOptions): Promise<StockListResponseDto> {
-  return Promise.resolve(listSimulatedStocks(options));
+export async function listStocks(options: ListStocksOptions): Promise<StockListResponseDto> {
+  await applyMockDelay();
+  return listSimulatedStocks(options);
 }
 
 export type { ListStocksOptions, StockListResponseDto };

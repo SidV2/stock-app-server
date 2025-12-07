@@ -1,6 +1,8 @@
 import { TopPickDto } from '../models';
 import { getSimulatedTopPicks } from './market-simulator';
+import { applyMockDelay } from '../utils/mock-delay';
 
-export function getTopPicks(): Promise<TopPickDto[]> {
-  return Promise.resolve(getSimulatedTopPicks());
+export async function getTopPicks(): Promise<TopPickDto[]> {
+  await applyMockDelay();
+  return getSimulatedTopPicks();
 }
