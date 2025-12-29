@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import { createServer } from 'http';
 import { config } from 'dotenv';
 import stockDetailRouter from './routes/stock-detail.route';
+import stockHistoryRouter from './routes/stock-history.route';
 import topPicksRouter from './routes/top-picks.route';
 import { HttpError } from './utils/http-error';
 import { attachWebSocketServer } from './websocket/server';
@@ -49,6 +50,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/stocks', stockDetailRouter);
+app.use('/api/stock-history', stockHistoryRouter);
 app.use('/api/top-picks', topPicksRouter);
 
 app.use((_req, _res, next) => {

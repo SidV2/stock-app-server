@@ -14,13 +14,7 @@ type Subscription = {
   timer?: NodeJS.Timeout;
 };
 
-type StockDetailMessage = {
-  type: 'stockDetail';
-  symbol: string;
-  data: StockDetailDto;
-  updatedAt: number;
-  delayedByMs: number;
-};
+
 const DISCONNECT_MIN_MS = 45_000;
 const DISCONNECT_MAX_MS = 120_000;
 
@@ -113,23 +107,28 @@ export function attachWebSocketServer(server: HttpServer): void {
   });
 }
 
+type StockQuoteMessage = {
+  type: 'stockQuote';
+  symbol: string;
+  data: {
+    price: number;
+    timestamp: number;
+  };
+};
+
 async function pushUpdate(ws: WebSocket, symbol: string, sendDelayMs = 0): Promise<void> {
   try {
+    // While this still calls getStockDetail, it only sends the price and timestamp
+    // to the client, reducing network overhead. A more performant solution
+    // would involve changing the market-simulator to only return the latest price.
     const detail = await getStockDetail(symbol);
-    const complete: StockDetailDto = {
-      ...detail,
-      insights: detail.insights ?? [],
-      news: detail.news ?? [],
-      history: detail.history ?? [],
-      historyIntervalMinutes: detail.historyIntervalMinutes ?? 1,
-      updatedAt: detail.updatedAt ?? Date.now()
-    };
-    const payload: StockDetailMessage = {
-      type: 'stockDetail',
+    const payload: StockQuoteMessage = {
+      type: 'stockQuote',
       symbol,
-      data: complete,
-      updatedAt: complete.updatedAt,
-      delayedByMs: sendDelayMs
+      data: {
+        price: detail.price,
+        timestamp: detail.updatedAt,
+      }
     };
     if (sendDelayMs > 0) {
       setTimeout(() => ws.send(JSON.stringify(payload)), sendDelayMs);

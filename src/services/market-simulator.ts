@@ -501,3 +501,5 @@ function generateSyntheticProfiles(count: number): StockProfile[] {
 
   return generated;
 }
+
+
